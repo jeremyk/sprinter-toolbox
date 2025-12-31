@@ -1,5 +1,23 @@
 # MikroTik Scripts
 
+## wifi_gate_status.rsc
+
+Debug script that prints the current status of all WiFi Gate globals and connectivity info.
+
+```routeros
+/system/script/run wifi_gate_status
+```
+
+Output includes:
+- Global variables (upStreak, downStreak)
+- WiFi interface status (enabled/disabled for each)
+- WAN interface info
+- Active default routes
+- Starlink dish ping
+- Internet connectivity pings
+
+---
+
 ## wifi_gate_on_wan.rsc
 
 Disables WiFi radios when WAN internet connectivity is lost, so devices automatically fall back to cellular. Re-enables WiFi when connectivity returns.
