@@ -10,10 +10,12 @@
 :if ([:typeof $WIFIGATEdownStreak] = "nothing") do={:set WIFIGATEdownStreak 0}
 :if ([:typeof $WIFIGATElastState] = "nothing") do={:set WIFIGATElastState "unknown"}
 
-:local prefix "WIFIGATE:"
+:local logPrefix "WIFIGATE:"
+:local debug true
 :local wanListName "WAN"
 :local pingTarget "1.1.1.1"
 :local pingCount 3
+:local pingInterval 500ms
 :local pingMinSuccess 2
 :local minUpStreak 2
 :local minDownStreak 2
@@ -27,7 +29,7 @@
 } on-error={:set wanIf ""}
 
 :if ($wanIf = "") do={
-  :log warning "$prefix No WAN interface found"
+  :log warning "$logPrefix No WAN interface found"
   :error "No WAN interface"
 }
 
@@ -40,7 +42,7 @@
 :local pingReplies 0
 :if ($hasDefaultRoute) do={
   :do {
-    :set pingReplies [/ping $pingTarget count=$pingCount]
+    :set pingReplies [/ping $pingTarget count=$pingCount interval=$pingInterval]
     :set pingOk ($pingReplies >= $pingMinSuccess)
   } on-error={
     :set pingReplies 0
@@ -58,7 +60,9 @@
   :set WIFIGATEupStreak 0
 }
 
-:log info "$prefix WAN=$wanIf route=$hasDefaultRoute ping=$pingReplies/$pingCount internetUp=$internetUp upStreak=$WIFIGATEupStreak downStreak=$WIFIGATEdownStreak last=$WIFIGATElastState"
+:if ($debug) do={
+  :log info "$logPrefix WAN=$wanIf route=$hasDefaultRoute ping=$pingReplies/$pingCount internetUp=$internetUp upStreak=$WIFIGATEupStreak downStreak=$WIFIGATEdownStreak last=$WIFIGATElastState"
+}
 
 :local hasWifi false
 :do {
@@ -66,18 +70,18 @@
 } on-error={}
 
 :if (!$hasWifi) do={
-  :log warning "$prefix No wifi interfaces found"
+  :log warning "$logPrefix No wifi interfaces found"
   :error "No wifi"
 }
 
 :if ($internetUp && $WIFIGATEupStreak >= $minUpStreak && $WIFIGATElastState != "enabled") do={
-  :log info "$prefix Enabling WiFi radios"
-  :do {/interface/wifi/enable [find]} on-error={:log warning "$prefix Failed to enable wifi"}
+  :log info "$logPrefix Enabling WiFi radios"
+  :do {/interface/wifi/enable [find]} on-error={:log warning "$logPrefix Failed to enable wifi"}
   :set WIFIGATElastState "enabled"
 }
 
 :if (!$internetUp && $WIFIGATEdownStreak >= $minDownStreak && $WIFIGATElastState != "disabled") do={
-  :log info "$prefix Disabling WiFi radios"
-  :do {/interface/wifi/disable [find]} on-error={:log warning "$prefix Failed to disable wifi"}
+  :log info "$logPrefix Disabling WiFi radios"
+  :do {/interface/wifi/disable [find]} on-error={:log warning "$logPrefix Failed to disable wifi"}
   :set WIFIGATElastState "disabled"
 }
