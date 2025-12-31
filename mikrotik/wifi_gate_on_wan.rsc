@@ -1,6 +1,4 @@
 # WiFi Gate (RouterOS 7.x) - disable WiFi radios until WAN has working Internet
-# Log prefix: WIFIGATE:
-# /log/print where message~"WIFIGATE:"
 
 :global WIFIGATEupStreak
 :global WIFIGATEdownStreak
